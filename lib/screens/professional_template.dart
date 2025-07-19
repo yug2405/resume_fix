@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:resume_fix/utils/global.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/gestures.dart'; // Required for TapGestureRecognizer
+import 'package:flutter/gestures.dart';
 
 class ProfessionalTemplate extends StatelessWidget {
   final Set<String> sections;
@@ -38,37 +38,49 @@ class ProfessionalTemplate extends StatelessWidget {
     return uri.host.replaceFirst('www.', '') + uri.path;
   }
 
+  Widget clickableText(String label, String value, String scheme) {
+    if (value.isEmpty) return const SizedBox();
+    final Uri uri = Uri.parse('$scheme${value.trim()}');
+    return RichText(
+      text: TextSpan(
+        text: '$label: $value',
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+      ),
+    );
+  }
+
   Widget labeledLink(String label, String rawUrl) {
     String url = rawUrl.trim();
-    if (!url.startsWith("http") && !url.startsWith("mailto:")) {
+    if (!url.startsWith("http")) {
       url = "https://$url";
     }
-
     final Uri uri = Uri.parse(url);
     final String displayText = shortenUrl(uri.toString());
 
-    return SelectableText.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: "$label: ",
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
-          ),
-          TextSpan(
-            text: displayText,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              color: Colors.blue,
-              decoration: TextDecoration.underline,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () async {
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
-              },
-          ),
-        ],
+    return RichText(
+      text: TextSpan(
+        text: "$label: $displayText",
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
       ),
     );
   }
@@ -127,16 +139,10 @@ class ProfessionalTemplate extends StatelessWidget {
               spacing: 12,
               runSpacing: 6,
               children: [
-                if (Globals.email.isNotEmpty && Globals.number.isNotEmpty)
-                  Text("Email: ${Globals.email} | Phone: ${Globals.number}",
-                      style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87))
-                else if (Globals.email.isNotEmpty)
-                  Text("Email: ${Globals.email}",
-                      style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87))
-                else if (Globals.number.isNotEmpty)
-                  Text("Phone: ${Globals.number}",
-                      style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87)),
-
+                if (Globals.email.isNotEmpty)
+                  clickableText("Email", Globals.email, "mailto:"),
+                if (Globals.number.isNotEmpty)
+                  clickableText("Phone", Globals.number, "tel:"),
                 if (Globals.github.isNotEmpty) labeledLink("GitHub", Globals.github),
                 if (Globals.linkedin.isNotEmpty) labeledLink("LinkedIn", Globals.linkedin),
                 if (Globals.portfolio.isNotEmpty) labeledLink("Portfolio", Globals.portfolio),
@@ -144,27 +150,26 @@ class ProfessionalTemplate extends StatelessWidget {
             ),
           ],
 
-          if ((sections.contains("summary") || 
-     sections.contains("career objective") || 
-     sections.contains("professional development")) &&
-    (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty))
-  section("📝 Summary", [
-    if (Globals.currentdes.isNotEmpty)
-      Text(
-        "Designation: ${Globals.currentdes}",
-        style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
-      ),
-    if (Globals.careerObjective.isNotEmpty)
-      Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(
-          Globals.careerObjective,
-          style: GoogleFonts.poppins(fontSize: 14),
-          textAlign: TextAlign.justify,
-        ),
-      ),
-  ]),
-
+          if ((sections.contains("summary") ||
+                  sections.contains("career objective") ||
+                  sections.contains("professional development")) &&
+              (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty))
+            section("📝 Summary", [
+              if (Globals.currentdes.isNotEmpty)
+                Text(
+                  "Designation: ${Globals.currentdes}",
+                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
+                ),
+              if (Globals.careerObjective.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    Globals.careerObjective,
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    textAlign: TextAlign.justify,
+                  ),
+                ),
+            ]),
 
           if (sections.contains("education") &&
               (Globals.course.isNotEmpty || Globals.school.isNotEmpty))
@@ -236,7 +241,7 @@ class ProfessionalTemplate extends StatelessWidget {
             }).toList()),
 
           if ((sections.contains("achievements") || sections.contains("awards") ||
-              sections.contains("moot court") || sections.contains("certifications")) &&
+                  sections.contains("moot court") || sections.contains("certifications")) &&
               (Globals.achievements.isNotEmpty || Globals.certifications.isNotEmpty))
             section("🏅 Achievements & Certifications", [
               ...Globals.achievements.map((a) => Padding(

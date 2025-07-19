@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart'; // Required for TapGestureRecognizer
+import 'package:flutter/gestures.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:resume_fix/utils/global.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -46,8 +46,8 @@ class ModernTemplate extends StatelessWidget {
     final Uri uri = Uri.parse(url);
     final String displayText = shortenUrl(uri.toString());
 
-    return SelectableText.rich(
-      TextSpan(
+    return RichText(
+      text: TextSpan(
         children: [
           TextSpan(
             text: "$label: ",
@@ -167,25 +167,23 @@ class ModernTemplate extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if ((sections.contains("summary") || sections.contains("career objective") || sections.contains("professional development")) &&
-    (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) ...[
-  sectionTitle("📝 Summary"),
-  
-  if (Globals.currentdes.isNotEmpty)
-    Text(
-      "Designation: ${Globals.currentdes}",
-      style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
-    ),
-    
-  if (Globals.careerObjective.isNotEmpty)
-    Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Text(
-        Globals.careerObjective,
-        style: GoogleFonts.poppins(fontSize: 14),
-        textAlign: TextAlign.justify,
-      ),
-    ),
-],
+                        (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) ...[
+                      sectionTitle("📝 Summary"),
+                      if (Globals.currentdes.isNotEmpty)
+                        Text(
+                          "Designation: ${Globals.currentdes}",
+                          style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
+                        ),
+                      if (Globals.careerObjective.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            Globals.careerObjective,
+                            style: GoogleFonts.poppins(fontSize: 14),
+                            textAlign: TextAlign.justify,
+                          ),
+                        ),
+                    ],
 
                     if ((sections.contains("technical skills") || sections.contains("skills")) &&
                         Globals.skills.isNotEmpty) ...[

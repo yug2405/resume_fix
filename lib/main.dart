@@ -4,7 +4,7 @@ import 'package:resume_fix/utils/routes/routes.dart'; // ✅ Your existing route
 
 Future<void> main() async {
   // ✅ Load the .env file before running the app
-  await dotenv.load();
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(

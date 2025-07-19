@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:resume_fix/utils/global.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,6 +12,35 @@ class CreativeTemplate extends StatelessWidget {
     final uri = Uri.tryParse(url.trim());
     if (uri == null) return url;
     return uri.host.replaceFirst('www.', '') + uri.path;
+  }
+
+  String ensureUrl(String url) {
+    if (!url.startsWith('http')) {
+      return 'https://${url.trim()}';
+    }
+    return url.trim();
+  }
+
+  Widget clickableLink(String label, String url) {
+    final Uri uri = Uri.parse(ensureUrl(url));
+    final String displayText = shortenUrl(uri.toString());
+
+    return RichText(
+      text: TextSpan(
+        text: "$label: $displayText",
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+      ),
+    );
   }
 
   Widget numberedText(String text, int index) => Padding(
@@ -83,88 +113,74 @@ class CreativeTemplate extends StatelessWidget {
 
           // 📞 Contact Info
           if (sections.contains("contact info")) ...[
-  const SizedBox(height: 4),
-  Wrap(
-  spacing: 10,
-  runSpacing: 4,
-  children: [
-    if (Globals.email.isNotEmpty && Globals.number.isNotEmpty)
-      Text(
-        "Email: ${Globals.email} | ${Globals.number}",
-        style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
-      )
-    else if (Globals.email.isNotEmpty)
-      Text("Email: ${Globals.email}", style: GoogleFonts.poppins(fontSize: 13))
-    else if (Globals.number.isNotEmpty)
-      Text(Globals.number, style: GoogleFonts.poppins(fontSize: 13)),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 10,
+              runSpacing: 4,
+              children: [
+                if (Globals.email.isNotEmpty)
+                  RichText(
+                    text: TextSpan(
+                      text: "Email: ${Globals.email}",
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          final Uri emailUri = Uri.parse("mailto:${Globals.email}");
+                          if (await canLaunchUrl(emailUri)) {
+                            await launchUrl(emailUri);
+                          }
+                        },
+                    ),
+                  ),
+                if (Globals.number.isNotEmpty)
+                  RichText(
+                    text: TextSpan(
+                      text: Globals.number,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          final Uri phoneUri = Uri.parse("tel:${Globals.number}");
+                          if (await canLaunchUrl(phoneUri)) {
+                            await launchUrl(phoneUri);
+                          }
+                        },
+                    ),
+                  ),
+                if (Globals.github.isNotEmpty) clickableLink("GitHub", Globals.github),
+                if (Globals.linkedin.isNotEmpty) clickableLink("LinkedIn", Globals.linkedin),
+                if (Globals.portfolio.isNotEmpty) clickableLink("Portfolio", Globals.portfolio),
+              ],
+            ),
+          ],
 
-    if (Globals.github.isNotEmpty)
-      InkWell(
-        onTap: () async {
-          final url = Uri.parse(Globals.github.trim());
-          if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
-        },
-        child: Text(
-          "GitHub: ${shortenUrl(Globals.github)}",
-          style: GoogleFonts.poppins(
-              fontSize: 13, color: Colors.blue, decoration: TextDecoration.underline),
-        ),
-      ),
-
-    if (Globals.linkedin.isNotEmpty)
-      InkWell(
-        onTap: () async {
-          final url = Uri.parse(Globals.linkedin.trim());
-          if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
-        },
-        child: Text(
-          "LinkedIn: ${shortenUrl(Globals.linkedin)}",
-          style: GoogleFonts.poppins(
-              fontSize: 13, color: Colors.blue, decoration: TextDecoration.underline),
-        ),
-      ),
-
-    if (Globals.portfolio.isNotEmpty)
-      InkWell(
-        onTap: () async {
-          final url = Uri.parse(Globals.portfolio.trim());
-          if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
-        },
-        child: Text(
-          "Portfolio: ${shortenUrl(Globals.portfolio)}",
-          style: GoogleFonts.poppins(
-              fontSize: 13, color: Colors.blue, decoration: TextDecoration.underline),
-        ),
-      ),
-  ],
-),
-],
-
-         if ((sections.contains("summary") || 
-     sections.contains("career objective") || 
-     sections.contains("professional development")) &&
-    (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) ...[
-  
-  sectionTitle("📝 Summary"),
-  
-  if (Globals.currentdes.isNotEmpty)
-    Text(
-      "Designation: ${Globals.currentdes}",
-      style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
-    ),
-    
-  if (Globals.careerObjective.isNotEmpty)
-    Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Text(
-        Globals.careerObjective,
-        style: GoogleFonts.poppins(fontSize: 14),
-        textAlign: TextAlign.justify,
-      ),
-    ),
-],
-
-
+          if ((sections.contains("summary") || 
+              sections.contains("career objective") || 
+              sections.contains("professional development")) &&
+              (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) ...[
+            sectionTitle("📝 Summary"),
+            if (Globals.currentdes.isNotEmpty)
+              Text(
+                "Designation: ${Globals.currentdes}",
+                style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
+              ),
+            if (Globals.careerObjective.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  Globals.careerObjective,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  textAlign: TextAlign.justify,
+                ),
+              ),
+          ],
 
           if (sections.contains("education") &&
               (Globals.course.isNotEmpty || Globals.school.isNotEmpty)) ...[
@@ -214,18 +230,13 @@ class CreativeTemplate extends StatelessWidget {
             ...Globals.projects.asMap().entries.map((entry) {
               final i = entry.key;
               final p = entry.value;
-              final name = p['name'] ?? '';
-              final desc = p['desc'] ?? '';
-              final role = p['role'] ?? '';
-              final tech = p['tech'] ?? '';
-
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (name.isNotEmpty) numberedText(name, i),
-                  if (desc.isNotEmpty) bulletDash("Description: $desc"),
-                  if (role.isNotEmpty) bulletDash("Role: $role"),
-                  if (tech.isNotEmpty) bulletDash("Technologies: $tech"),
+                  if ((p['name'] ?? '').isNotEmpty) numberedText(p['name']!, i),
+                  if ((p['desc'] ?? '').isNotEmpty) bulletDash("Description: ${p['desc']}"),
+                  if ((p['role'] ?? '').isNotEmpty) bulletDash("Role: ${p['role']}"),
+                  if ((p['tech'] ?? '').isNotEmpty) bulletDash("Technologies: ${p['tech']}"),
                   const SizedBox(height: 6),
                 ],
               );
@@ -233,14 +244,13 @@ class CreativeTemplate extends StatelessWidget {
           ],
 
           if ((sections.contains("internships") ||
-                  sections.contains("work experience") ||
-                  sections.contains("experiences")) &&
+              sections.contains("work experience") ||
+              sections.contains("experiences")) &&
               Globals.experiences.isNotEmpty) ...[
             sectionTitle("🧑‍💼 Experience"),
             ...Globals.experiences.asMap().entries.map((entry) {
               final i = entry.key;
               final exp = entry.value;
-
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -254,14 +264,15 @@ class CreativeTemplate extends StatelessWidget {
           ],
 
           if ((sections.contains("achievements") || sections.contains("awards") ||
-                  sections.contains("moot court") || sections.contains("certifications")) &&
+              sections.contains("moot court") || sections.contains("certifications")) &&
               (Globals.achievements.isNotEmpty || Globals.certifications.isNotEmpty)) ...[
             sectionTitle("🏅 Achievements & Certifications"),
             ...Globals.achievements.asMap().entries
                 .map((entry) => numberedText(entry.value, entry.key)),
             if (Globals.certifications.isNotEmpty) ...[
               const SizedBox(height: 6),
-              Text("📜 Certifications", style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
+              Text("📜 Certifications",
+                  style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
               ...Globals.certifications.asMap().entries
                   .map((entry) => numberedText(entry.value, entry.key)),

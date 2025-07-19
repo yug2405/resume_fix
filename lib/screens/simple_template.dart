@@ -112,13 +112,41 @@ class SimpleTemplate extends StatelessWidget {
               spacing: 12,
               runSpacing: 6,
               children: [
-                if (Globals.email.isNotEmpty || Globals.number.isNotEmpty)
-                  Text(
-                    [
-                      if (Globals.email.isNotEmpty) "Email: ${Globals.email}",
-                      if (Globals.number.isNotEmpty) "Phone: ${Globals.number}"
-                    ].join(" | "),
-                    style: GoogleFonts.poppins(fontSize: 13),
+                if (Globals.email.isNotEmpty)
+                  RichText(
+                    text: TextSpan(
+                      text: "Email: ${Globals.email}",
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          final Uri uri = Uri.parse("mailto:${Globals.email}");
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          }
+                        },
+                    ),
+                  ),
+                if (Globals.number.isNotEmpty)
+                  RichText(
+                    text: TextSpan(
+                      text: "Phone: ${Globals.number}",
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          final Uri uri = Uri.parse("tel:${Globals.number}");
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          }
+                        },
+                    ),
                   ),
                 if (Globals.github.isNotEmpty) labeledLink("GitHub", Globals.github),
                 if (Globals.linkedin.isNotEmpty) labeledLink("LinkedIn", Globals.linkedin),
@@ -128,28 +156,25 @@ class SimpleTemplate extends StatelessWidget {
           ],
 
           if ((sections.contains("summary") ||
-     sections.contains("career objective") ||
-     sections.contains("professional development")) &&
-    (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) ...[
-  sectionTitle("📝 Summary"),
-
-  if (Globals.currentdes.isNotEmpty)
-    Text(
-      "Designation: ${Globals.currentdes}",
-      style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
-    ),
-
-  if (Globals.careerObjective.isNotEmpty)
-    Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Text(
-        Globals.careerObjective,
-        style: GoogleFonts.poppins(fontSize: 14),
-        textAlign: TextAlign.justify,
-      ),
-    ),
-],
-
+                  sections.contains("career objective") ||
+                  sections.contains("professional development")) &&
+              (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) ...[
+            sectionTitle("📝 Summary"),
+            if (Globals.currentdes.isNotEmpty)
+              Text(
+                "Designation: ${Globals.currentdes}",
+                style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
+              ),
+            if (Globals.careerObjective.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  Globals.careerObjective,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  textAlign: TextAlign.justify,
+                ),
+              ),
+          ],
 
           if (sections.contains("education") &&
               (Globals.course.isNotEmpty || Globals.school.isNotEmpty)) ...[
@@ -165,7 +190,8 @@ class SimpleTemplate extends StatelessWidget {
             ...Globals.skills.map((s) => bullet(s)),
           ],
 
-          if ((sections.contains("projects") || sections.contains("research projects") ||
+          if ((sections.contains("projects") ||
+                  sections.contains("research projects") ||
                   sections.contains("relevant coursework")) &&
               Globals.projects.isNotEmpty) ...[
             sectionTitle("📁 Projects"),
@@ -209,8 +235,10 @@ class SimpleTemplate extends StatelessWidget {
             }),
           ],
 
-          if ((sections.contains("achievements") || sections.contains("awards") ||
-                  sections.contains("moot court") || sections.contains("certifications")) &&
+          if ((sections.contains("achievements") ||
+                  sections.contains("awards") ||
+                  sections.contains("moot court") ||
+                  sections.contains("certifications")) &&
               (Globals.achievements.isNotEmpty || Globals.certifications.isNotEmpty)) ...[
             sectionTitle("🏅 Achievements & Certifications"),
             ...Globals.achievements.map((a) => bullet(a)),
