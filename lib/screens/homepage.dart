@@ -82,15 +82,11 @@ class _HomepageState extends State<Homepage> {
             const SizedBox(height: 12),
 
             buildMainButton(
-              text: "Edit Existing Resume",
-              color: Colors.grey.shade800,
-              onPressed: () {
-                // TODO: Implement saved resume list
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Coming Soon...")),
-                );
-              },
-            ),
+  text: "Edit Existing Resume",
+  onPressed: () {
+    Navigator.of(context).pushNamed(Routes.buildOptionPage);
+  },
+),
 
             const SizedBox(height: 12),
 

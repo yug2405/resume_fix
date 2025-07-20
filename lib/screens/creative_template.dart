@@ -153,7 +153,8 @@ class CreativeTemplate extends StatelessWidget {
 
           if ((sections.contains("summary") || 
               sections.contains("career objective") || 
-              sections.contains("professional development")) &&
+              sections.contains("professional development") ||
+                            sections.contains("objective")) &&
               (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) ...[
             sectionTitle("📝 Summary"),
             if (Globals.currentdes.isNotEmpty)
@@ -187,7 +188,8 @@ class CreativeTemplate extends StatelessWidget {
             ...Globals.skills.map((s) => bulletDash(s)),
           ],
 
-          if (sections.contains("languages") && Globals.languages.isNotEmpty) ...[
+          if ((sections.contains("languages") ||
+                            sections.contains("activities")) && Globals.languages.isNotEmpty) ...[
             sectionTitle("🌐 Languages"),
             ...Globals.languages.map((lang) {
               final String name = lang['lang'] ?? '';

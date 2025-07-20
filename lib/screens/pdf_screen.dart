@@ -245,35 +245,37 @@ class PdfScreen extends StatelessWidget {
     }
 
     // ---------- Languages ----------
-    if (Globals.languages.isNotEmpty && sections.contains("languages")) {
-      leftColumn.add(sectionHeader("Languages"));
+   if (Globals.languages.isNotEmpty && 
+    (sections.contains("languages") || sections.contains("activities"))) {
+  leftColumn.add(sectionHeader("Languages"));
 
-      String getLevelLabel(int level) {
-        switch (level) {
-          case 1:
-            return "Beginner";
-          case 2:
-            return "Elementary";
-          case 3:
-            return "Intermediate";
-          case 4:
-            return "Advanced";
-          case 5:
-            return "Fluent";
-          default:
-            return "Unknown";
-        }
-      }
-
-      for (var lang in Globals.languages) {
-        final name = lang["lang"] ?? '';
-        final level = lang["level"] ?? 0;
-        final label = getLevelLabel(level);
-        leftColumn.add(bullet("$name ($label)"));
-      }
-
-      leftColumn.add(pw.SizedBox(height: 10));
+  String getLevelLabel(int level) {
+    switch (level) {
+      case 1:
+        return "Beginner";
+      case 2:
+        return "Elementary";
+      case 3:
+        return "Intermediate";
+      case 4:
+        return "Advanced";
+      case 5:
+        return "Fluent";
+      default:
+        return "Unknown";
     }
+  }
+
+  for (var lang in Globals.languages) {
+    final name = lang["lang"] ?? '';
+    final level = lang["level"] ?? 0;
+    final label = getLevelLabel(level);
+    leftColumn.add(bullet("$name ($label)"));
+  }
+
+  leftColumn.add(pw.SizedBox(height: 10));
+}
+
 
     // ---------- Education ----------
     if (sections.contains("education")) {
@@ -301,7 +303,8 @@ class PdfScreen extends StatelessWidget {
 
     // ---------- Summary ----------
     if ((sections.contains("summary") ||
-            sections.contains("professional development")) &&
+            sections.contains("professional development") ||
+                            sections.contains("objective")) &&
         (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) {
       rightColumn.add(sectionHeader("Summary"));
 
@@ -564,7 +567,8 @@ pw.Widget buildSimpleTemplate(Set<String> sections) {
 
         // Summary
         if ((sections.contains("summary") ||
-                sections.contains("professional development")) &&
+                sections.contains("professional development") ||
+                            sections.contains("objective")) &&
             (Globals.careerObjective.isNotEmpty ||
                 Globals.currentdes.isNotEmpty)) ...[
           sectionHeader("Summary"),
@@ -718,34 +722,35 @@ pw.Widget buildSimpleTemplate(Set<String> sections) {
 
 
         // Languages
-        if (sections.contains("languages") && Globals.languages.isNotEmpty) ...[
-          sectionHeader("Languages"),
-          ...Globals.languages.map((lang) {
-            final name = lang["lang"] ?? '';
-            final level = lang["level"] ?? 0;
-            String levelLabel;
-            switch (level) {
-              case 1:
-                levelLabel = "Beginner";
-                break;
-              case 2:
-                levelLabel = "Elementary";
-                break;
-              case 3:
-                levelLabel = "Intermediate";
-                break;
-              case 4:
-                levelLabel = "Advanced";
-                break;
-              case 5:
-                levelLabel = "Fluent";
-                break;
-              default:
-                levelLabel = "Unknown";
-            }
-            return bullet("$name ($levelLabel)");
-          }),
-        ],
+        if ((sections.contains("languages") || sections.contains("activities")) &&
+    Globals.languages.isNotEmpty) ...[
+  sectionHeader("Languages"),
+  ...Globals.languages.map((lang) {
+    final name = lang["lang"] ?? '';
+    final level = lang["level"] ?? 0;
+    String levelLabel;
+    switch (level) {
+      case 1:
+        levelLabel = "Beginner";
+        break;
+      case 2:
+        levelLabel = "Elementary";
+        break;
+      case 3:
+        levelLabel = "Intermediate";
+        break;
+      case 4:
+        levelLabel = "Advanced";
+        break;
+      case 5:
+        levelLabel = "Fluent";
+        break;
+      default:
+        levelLabel = "Unknown";
+    }
+    return bullet("$name ($levelLabel)");
+  }),
+]
       ],
     ),
   );
@@ -884,7 +889,8 @@ pw.Widget buildSimpleTemplate(Set<String> sections) {
 
         // Summary
         if ((sections.contains("summary") ||
-                sections.contains("professional development")) &&
+                sections.contains("professional development") ||
+                            sections.contains("objective")) &&
             (Globals.careerObjective.isNotEmpty ||
                 Globals.currentdes.isNotEmpty)) ...[
           sectionHeader("Summary"),
@@ -1090,31 +1096,33 @@ pw.Widget buildSimpleTemplate(Set<String> sections) {
         ],
 
         // Languages
-        if (sections.contains("languages") && Globals.languages.isNotEmpty) ...[
-          sectionHeader("Languages"),
-          ...Globals.languages.map((lang) {
-            final level = (lang['level'] as num).toInt();
-            String getLevelLabel(int level) {
-              switch (level) {
-                case 1:
-                  return "Beginner";
-                case 2:
-                  return "Elementary";
-                case 3:
-                  return "Intermediate";
-                case 4:
-                  return "Advanced";
-                case 5:
-                  return "Fluent";
-                default:
-                  return "Unknown";
-              }
-            }
+        if ((sections.contains("languages") || sections.contains("activities")) &&
+    Globals.languages.isNotEmpty) ...[
+  sectionHeader("Languages"),
+  ...Globals.languages.map((lang) {
+    final level = (lang['level'] as num).toInt();
 
-            final label = getLevelLabel(level);
-            return pw.Text("${lang['lang']}: $label", style: textStyle);
-          }),
-        ],
+    String getLevelLabel(int level) {
+      switch (level) {
+        case 1:
+          return "Beginner";
+        case 2:
+          return "Elementary";
+        case 3:
+          return "Intermediate";
+        case 4:
+          return "Advanced";
+        case 5:
+          return "Fluent";
+        default:
+          return "Unknown";
+      }
+    }
+
+    final label = getLevelLabel(level);
+    return pw.Text("${lang['lang']}: $label", style: textStyle);
+  }),
+],
 
         // Declaration
         if (Globals.declaration.isNotEmpty) ...[
@@ -1252,7 +1260,8 @@ pw.Widget buildSimpleTemplate(Set<String> sections) {
               pw.SizedBox(height: 12),
 
               if ((sections.contains("summary") ||
-                      sections.contains("professional development")) &&
+                      sections.contains("professional development") ||
+                            sections.contains("objective")) &&
                   (Globals.careerObjective.isNotEmpty ||
                       Globals.currentdes.isNotEmpty)) ...[
                 sectionHeader("Summary"),
@@ -1379,33 +1388,35 @@ pw.Widget buildSimpleTemplate(Set<String> sections) {
 ],
 
 
-              if (sections.contains("languages") &&
-                  Globals.languages.isNotEmpty) ...[
-                sectionHeader("Languages"),
-                ...Globals.languages.map((lang) {
-                  final level = (lang['level'] as num).toInt();
-                  String getLevelLabel(int level) {
-                    switch (level) {
-                      case 1:
-                        return "Beginner";
-                      case 2:
-                        return "Elementary";
-                      case 3:
-                        return "Intermediate";
-                      case 4:
-                        return "Advanced";
-                      case 5:
-                        return "Fluent";
-                      default:
-                        return "Unknown";
-                    }
-                  }
+              if ((sections.contains("languages") || sections.contains("activities")) &&
+    Globals.languages.isNotEmpty) ...[
+  sectionHeader("Languages"),
+  ...Globals.languages.map((lang) {
+    final level = (lang['level'] as num).toInt();
 
-                  final label = getLevelLabel(level);
-                  return bulletDash("${lang['lang']}: $label");
-                }),
-                pw.SizedBox(height: 10),
-              ],
+    String getLevelLabel(int level) {
+      switch (level) {
+        case 1:
+          return "Beginner";
+        case 2:
+          return "Elementary";
+        case 3:
+          return "Intermediate";
+        case 4:
+          return "Advanced";
+        case 5:
+          return "Fluent";
+        default:
+          return "Unknown";
+      }
+    }
+
+    final label = getLevelLabel(level);
+    return bulletDash("${lang['lang']}: $label");
+  }),
+  pw.SizedBox(height: 10),
+],
+
 
               if (sections.contains("references") &&
                   (Globals.r_name.isNotEmpty ||

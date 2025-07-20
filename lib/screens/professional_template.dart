@@ -159,7 +159,8 @@ if (Globals.number.isNotEmpty) clickableText("Phone", Globals.number, "tel:"),
 
           if ((sections.contains("summary") ||
                   sections.contains("career objective") ||
-                  sections.contains("professional development")) &&
+                  sections.contains("professional development") ||
+                            sections.contains("objective")) &&
               (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty))
             section("📝 Summary", [
               if (Globals.currentdes.isNotEmpty)
@@ -266,7 +267,8 @@ if (Globals.number.isNotEmpty) clickableText("Phone", Globals.number, "tel:"),
               ]
             ]),
 
-          if (sections.contains("languages") && Globals.languages.isNotEmpty)
+          if ((sections.contains("languages") ||
+                            sections.contains("activities")) && Globals.languages.isNotEmpty)
             section("🌐 Languages", Globals.languages.map((lang) {
               final String name = lang['lang'] ?? '';
               final int level = lang['level'] ?? 3;
