@@ -31,43 +31,54 @@ class ModernTemplate extends StatelessWidget {
         ),
       );
 
-  String shortenUrl(String url) {
-    final uri = Uri.tryParse(url.trim());
-    if (uri == null) return url;
-    return uri.host.replaceFirst('www.', '') + uri.path;
+  Widget clickableText(String label, String value, String scheme) {
+    if (value.isEmpty) return const SizedBox();
+    final Uri uri = Uri.parse('$scheme${value.trim()}');
+    return RichText(
+      text: TextSpan(
+        text: '$label: $value',
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+      ),
+    );
   }
 
   Widget labeledLink(String label, String rawUrl) {
     String url = rawUrl.trim();
-    if (!url.startsWith("http") && !url.startsWith("mailto:")) {
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
       url = "https://$url";
     }
 
     final Uri uri = Uri.parse(url);
-    final String displayText = shortenUrl(uri.toString());
+    final String displayText = url
+        .replaceFirst(RegExp(r'^https?:\/\/(www\.)?'), '')
+        .replaceAll(RegExp(r'\/$'), '');
 
     return RichText(
       text: TextSpan(
-        children: [
-          TextSpan(
-            text: "$label: ",
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
-          ),
-          TextSpan(
-            text: displayText,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              color: Colors.blue,
-              decoration: TextDecoration.underline,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () async {
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
-              },
-          ),
-        ],
+        text: "$label: $displayText",
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            try {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } catch (e) {
+              debugPrint("Failed to launch $url: $e");
+            }
+          },
       ),
     );
   }
@@ -96,7 +107,6 @@ class ModernTemplate extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left Column
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,25 +114,21 @@ class ModernTemplate extends StatelessWidget {
                     if (sections.contains("contact info")) ...[
                       Center(
                         child: Wrap(
-                          spacing: 10,
+                          spacing: 12,
                           runSpacing: 6,
-                          alignment: WrapAlignment.center,
                           children: [
+                            if (Globals.email.isNotEmpty)
+                              clickableText("Email", Globals.email, "mailto:"),
                             if (Globals.email.isNotEmpty && Globals.number.isNotEmpty)
-                              Text(
-                                "Email: ${Globals.email} | ${Globals.number}",
-                                style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
-                              )
-                            else if (Globals.email.isNotEmpty)
-                              Text("Email: ${Globals.email}",
-                                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700))
-                            else if (Globals.number.isNotEmpty)
-                              Text(Globals.number,
-                                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700)),
-
-                            if (Globals.github.isNotEmpty) labeledLink("GitHub", Globals.github),
-                            if (Globals.linkedin.isNotEmpty) labeledLink("LinkedIn", Globals.linkedin),
-                            if (Globals.portfolio.isNotEmpty) labeledLink("Portfolio", Globals.portfolio),
+                              Text("|", style: GoogleFonts.poppins(fontSize: 13, color: Colors.blueGrey)),
+                            if (Globals.number.isNotEmpty)
+                              clickableText("Phone", Globals.number, "tel:"),
+                            if (Globals.github.isNotEmpty)
+                              labeledLink("GitHub", Globals.github),
+                            if (Globals.linkedin.isNotEmpty)
+                              labeledLink("LinkedIn", Globals.linkedin),
+                            if (Globals.portfolio.isNotEmpty)
+                              labeledLink("Portfolio", Globals.portfolio),
                           ],
                         ),
                       ),
@@ -137,7 +143,9 @@ class ModernTemplate extends StatelessWidget {
                         bulletItem("Result: ${Globals.result}, Year: ${Globals.pass}"),
                     ],
 
-                    if ((sections.contains("projects") || sections.contains("research projects") || sections.contains("relevant coursework")) &&
+                    if ((sections.contains("projects") ||
+                            sections.contains("research projects") ||
+                            sections.contains("relevant coursework") || sections.contains("publications")) &&
                         Globals.projects.isNotEmpty) ...[
                       sectionTitle("📁 Projects"),
                       ...Globals.projects.asMap().entries.map((entry) {
@@ -158,15 +166,14 @@ class ModernTemplate extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(width: 40),
-
-              // Right Column
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if ((sections.contains("summary") || sections.contains("career objective") || sections.contains("professional development")) &&
+                    if ((sections.contains("summary") ||
+                            sections.contains("career objective") ||
+                            sections.contains("professional development")) &&
                         (Globals.careerObjective.isNotEmpty || Globals.currentdes.isNotEmpty)) ...[
                       sectionTitle("📝 Summary"),
                       if (Globals.currentdes.isNotEmpty)
@@ -203,7 +210,7 @@ class ModernTemplate extends StatelessWidget {
 
                     if ((sections.contains("internships") ||
                             sections.contains("experiences") ||
-                            sections.contains("work experience")) &&
+                            sections.contains("work experience") || sections.contains("volunteering")) &&
                         Globals.experiences.isNotEmpty) ...[
                       sectionTitle("💼 Experience"),
                       ...Globals.experiences.asMap().entries.map((entry) {

@@ -21,27 +21,38 @@ class CreativeTemplate extends StatelessWidget {
     return url.trim();
   }
 
-  Widget clickableLink(String label, String url) {
-    final Uri uri = Uri.parse(ensureUrl(url));
-    final String displayText = shortenUrl(uri.toString());
+  Widget clickableLink(String label, String rawUrl) {
+  String url = rawUrl.trim();
 
-    return RichText(
-      text: TextSpan(
-        text: "$label: $displayText",
-        style: GoogleFonts.poppins(
-          fontSize: 13,
-          color: Colors.blue,
-          decoration: TextDecoration.underline,
-        ),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () async {
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            }
-          },
-      ),
-    );
+  // Ensure URL always starts with https://
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://$url";
   }
+
+  final Uri uri = Uri.parse(url);
+  final String displayText = url
+      .replaceFirst(RegExp(r'^https?:\/\/(www\.)?'), '') // display shorten
+      .replaceAll(RegExp(r'\/$'), ''); // trailing slash remove
+
+  return RichText(
+    text: TextSpan(
+      text: "$label: $displayText",
+      style: GoogleFonts.poppins(
+        fontSize: 13,
+        color: Colors.blue,
+        decoration: TextDecoration.underline,
+      ),
+      recognizer: TapGestureRecognizer()
+        ..onTap = () async {
+          try {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } catch (e) {
+            debugPrint("Failed to launch $url: $e");
+          }
+        },
+    ),
+  );
+}
 
   Widget numberedText(String text, int index) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
@@ -115,50 +126,29 @@ class CreativeTemplate extends StatelessWidget {
           if (sections.contains("contact info")) ...[
             const SizedBox(height: 4),
             Wrap(
-              spacing: 10,
-              runSpacing: 4,
-              children: [
-                if (Globals.email.isNotEmpty)
-                  RichText(
-                    text: TextSpan(
-                      text: "Email: ${Globals.email}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () async {
-                          final Uri emailUri = Uri.parse("mailto:${Globals.email}");
-                          if (await canLaunchUrl(emailUri)) {
-                            await launchUrl(emailUri);
-                          }
-                        },
-                    ),
-                  ),
-                if (Globals.number.isNotEmpty)
-                  RichText(
-                    text: TextSpan(
-                      text: Globals.number,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () async {
-                          final Uri phoneUri = Uri.parse("tel:${Globals.number}");
-                          if (await canLaunchUrl(phoneUri)) {
-                            await launchUrl(phoneUri);
-                          }
-                        },
-                    ),
-                  ),
-                if (Globals.github.isNotEmpty) clickableLink("GitHub", Globals.github),
-                if (Globals.linkedin.isNotEmpty) clickableLink("LinkedIn", Globals.linkedin),
-                if (Globals.portfolio.isNotEmpty) clickableLink("Portfolio", Globals.portfolio),
-              ],
-            ),
+  spacing: 10,
+  runSpacing: 4,
+  children: [
+    if (Globals.email.isNotEmpty && Globals.number.isNotEmpty)
+      Text(
+        "${Globals.email} | ${Globals.number}",
+        style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
+      )
+    else if (Globals.email.isNotEmpty)
+      Text(
+        Globals.email,
+        style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
+      )
+    else if (Globals.number.isNotEmpty)
+      Text(
+        Globals.number,
+        style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
+      ),
+    if (Globals.github.isNotEmpty) clickableLink("GitHub", Globals.github),
+    if (Globals.linkedin.isNotEmpty) clickableLink("LinkedIn", Globals.linkedin),
+    if (Globals.portfolio.isNotEmpty) clickableLink("Portfolio", Globals.portfolio),
+  ],
+),
           ],
 
           if ((sections.contains("summary") || 
@@ -224,7 +214,7 @@ class CreativeTemplate extends StatelessWidget {
             }),
           ],
 
-          if ((sections.contains("projects") || sections.contains("research projects") || sections.contains("relevant coursework")) &&
+          if ((sections.contains("projects") || sections.contains("research projects") || sections.contains("relevant coursework") || sections.contains("publications")) &&
               Globals.projects.isNotEmpty) ...[
             sectionTitle("📁 Projects"),
             ...Globals.projects.asMap().entries.map((entry) {
@@ -245,7 +235,7 @@ class CreativeTemplate extends StatelessWidget {
 
           if ((sections.contains("internships") ||
               sections.contains("work experience") ||
-              sections.contains("experiences")) &&
+              sections.contains("experiences") || sections.contains("volunteering")) &&
               Globals.experiences.isNotEmpty) ...[
             sectionTitle("🧑‍💼 Experience"),
             ...Globals.experiences.asMap().entries.map((entry) {

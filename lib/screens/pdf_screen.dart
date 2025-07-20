@@ -245,7 +245,7 @@ class PdfScreen extends StatelessWidget {
     }
 
     // ---------- Languages ----------
-    if (Globals.languages.isNotEmpty) {
+    if (Globals.languages.isNotEmpty && sections.contains("languages")) {
       leftColumn.add(sectionHeader("Languages"));
 
       String getLevelLabel(int level) {
@@ -328,7 +328,7 @@ class PdfScreen extends StatelessWidget {
     // ---------- Experience ----------
     if ((sections.contains("experiences") ||
             sections.contains("work experience") ||
-            sections.contains("internships")) &&
+            sections.contains("internships") || sections.contains("volunteering")) &&
         Globals.experiences.isNotEmpty) {
       rightColumn.add(sectionHeader("Experience"));
       for (var exp in Globals.experiences) {
@@ -371,7 +371,7 @@ class PdfScreen extends StatelessWidget {
     // ---------- Projects ----------
     if ((sections.contains("projects") ||
             sections.contains("research projects") ||
-            sections.contains("relevant coursework")) &&
+            sections.contains("relevant coursework") || sections.contains("publications")) &&
         Globals.projects.isNotEmpty) {
       rightColumn.add(sectionHeader("Projects"));
       for (var proj in Globals.projects) {
@@ -402,9 +402,12 @@ class PdfScreen extends StatelessWidget {
 
     // ---------- Achievements & Certifications ----------
     if ((sections.contains("achievements") ||
-            sections.contains("certifications")) &&
-        (Globals.achievements.isNotEmpty ||
-            Globals.certifications.isNotEmpty)) {
+        sections.contains("awards") ||
+        sections.contains("moot court") ||
+        sections.contains("certifications")) &&
+    (Globals.achievements.isNotEmpty ||
+        Globals.certifications.isNotEmpty)) {
+
       rightColumn.add(sectionHeader("Achievements & Certifications"));
 
       rightColumn.addAll(
@@ -462,63 +465,377 @@ class PdfScreen extends StatelessWidget {
   // Extracted only the SIMPLE template layout based on your design
   // You can now integrate this into your `buildSimpleTemplate()` method
 
-  pw.Widget buildSimpleTemplate(Set<String> sections) {
-    final pw.TextStyle headerStyle = pw.TextStyle(
-      fontSize: 14,
-      fontWeight: pw.FontWeight.bold,
-      color: PdfColors.black,
-    );
+pw.Widget buildSimpleTemplate(Set<String> sections) {
+  final pw.TextStyle headerStyle = pw.TextStyle(
+    fontSize: 14,
+    fontWeight: pw.FontWeight.bold,
+    color: PdfColors.black,
+  );
 
-    final pw.TextStyle textStyle = pw.TextStyle(fontSize: 11);
+  final pw.TextStyle textStyle = pw.TextStyle(fontSize: 11, color: PdfColors.black);
 
-    pw.Widget sectionHeader(String text) => pw.Padding(
-      padding: const pw.EdgeInsets.only(top: 16, bottom: 8),
-      child: pw.Text(text.toUpperCase(), style: headerStyle),
-    );
+  pw.Widget sectionHeader(String text) => pw.Padding(
+        padding: const pw.EdgeInsets.only(top: 16, bottom: 8),
+        child: pw.Text(text.toUpperCase(), style: headerStyle),
+      );
 
-    pw.Widget bullet(String text) => pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text("- ", style: textStyle),
-        pw.Expanded(child: pw.Text(text, style: textStyle)),
-      ],
-    );
-
-    pw.Widget numberedBullet(String text, int index) => pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text("${index + 1}. ", style: textStyle),
-        pw.Expanded(child: pw.Text(text, style: textStyle)),
-      ],
-    );
-
-    return pw.Padding(
-      padding: const pw.EdgeInsets.all(20),
-      child: pw.Column(
+  pw.Widget bullet(String text) => pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Center(
-            child: pw.Text(
-              Globals.name.toUpperCase(),
-              style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
-            ),
-          ),
-          pw.SizedBox(height: 6),
+          pw.Text("- ", style: textStyle),
+          pw.Expanded(child: pw.Text(text, style: textStyle)),
+        ],
+      );
 
-          // Contact + Socials
-          pw.Center(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.center,
-              children: [
+  pw.Widget numberedBullet(String text, int index) => pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text("${index + 1}. ", style: textStyle),
+          pw.Expanded(child: pw.Text(text, style: textStyle)),
+        ],
+      );
+
+  return pw.Padding(
+    padding: const pw.EdgeInsets.all(20),
+    child: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Center(
+          child: pw.Text(
+            Globals.name.toUpperCase(),
+            style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+          ),
+        ),
+        pw.SizedBox(height: 6),
+
+        // Contact + Socials
+        pw.Center(
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Text(
+                "${Globals.email} | ${Globals.number}",
+                style: textStyle,
+              ),
+              if (Globals.dob.isNotEmpty || Globals.nationality.isNotEmpty)
                 pw.Text(
-                  "${Globals.email} | ${Globals.number}",
+                  "DOB: ${Globals.dob} | Nationality: ${Globals.nationality}",
                   style: textStyle,
                 ),
-                if (Globals.dob.isNotEmpty || Globals.nationality.isNotEmpty)
-                  pw.Text(
-                    "DOB: ${Globals.dob} | Nationality: ${Globals.nationality}",
-                    style: textStyle,
+              if (Globals.linkedin.isNotEmpty)
+                pw.UrlLink(
+                  destination: Globals.linkedin.startsWith("http")
+                      ? Globals.linkedin
+                      : "https://${Globals.linkedin}",
+                  child: pw.Text(
+                    "LinkedIn: ${Globals.linkedin}",
+                    style: textStyle.copyWith(
+                      decoration: pw.TextDecoration.underline,
+                    ),
                   ),
+                ),
+              if (Globals.github.isNotEmpty)
+                pw.UrlLink(
+                  destination: Globals.github.startsWith("http")
+                      ? Globals.github
+                      : "https://${Globals.github}",
+                  child: pw.Text(
+                    "GitHub: ${Globals.github}",
+                    style: textStyle.copyWith(
+                      decoration: pw.TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              if (Globals.portfolio.isNotEmpty)
+                pw.UrlLink(
+                  destination: Globals.portfolio.startsWith("http")
+                      ? Globals.portfolio
+                      : "https://${Globals.portfolio}",
+                  child: pw.Text(
+                    "Portfolio: ${Globals.portfolio}",
+                    style: textStyle.copyWith(
+                      decoration: pw.TextDecoration.underline,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        // Summary
+        if ((sections.contains("summary") ||
+                sections.contains("professional development")) &&
+            (Globals.careerObjective.isNotEmpty ||
+                Globals.currentdes.isNotEmpty)) ...[
+          sectionHeader("Summary"),
+          if (Globals.currentdes.isNotEmpty)
+            pw.Text("Designation: ${Globals.currentdes}", style: textStyle),
+          if (Globals.careerObjective.isNotEmpty) ...[
+            pw.SizedBox(height: 4),
+            pw.Text(Globals.careerObjective, style: textStyle),
+          ],
+          pw.SizedBox(height: 10),
+        ],
+
+        // Education
+        if (sections.contains("education")) ...[
+          sectionHeader("Education"),
+          pw.Text(
+            "${Globals.course} at ${Globals.school}",
+            style: pw.TextStyle(
+              fontSize: 11,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.black,
+            ),
+          ),
+          if (Globals.result.isNotEmpty || Globals.pass.isNotEmpty)
+            pw.Text(
+              "Result: ${Globals.result}, Year: ${Globals.pass}",
+              style: textStyle,
+            ),
+          pw.SizedBox(height: 10),
+        ],
+
+        // Skills
+        if ((sections.contains("skills") ||
+                sections.contains("technical skills")) &&
+            Globals.skills.isNotEmpty) ...[
+          sectionHeader("Skills"),
+          pw.Wrap(
+            spacing: 10,
+            runSpacing: 6,
+            children: Globals.skills
+                .map(
+                  (s) => pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 4,
+                        ),
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.grey200,
+                          borderRadius: pw.BorderRadius.circular(4),
+                        ),
+                        child: pw.Text(s, style: pw.TextStyle(fontSize: 10)),
+                      ),
+                )
+                .toList(),
+          ),
+          pw.SizedBox(height: 10),
+        ],
+
+        // Projects
+        if ((sections.contains("projects") ||
+                sections.contains("research projects") ||
+                sections.contains("relevant coursework") || sections.contains("publications")) &&
+            Globals.projects.isNotEmpty) ...[
+          sectionHeader("Projects"),
+          ...Globals.projects.asMap().entries.map((entry) {
+            final index = entry.key;
+            final proj = entry.value;
+            final title = proj['name'] ?? proj['title'] ?? '';
+            final desc = proj['desc'] ?? proj['description'] ?? '';
+            final role = proj['role'] ?? '';
+            final tech = proj['tech'] ?? '';
+
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                if (title.isNotEmpty)
+                  pw.Text(
+                    "${index + 1}. $title",
+                    style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 11,
+                      color: PdfColors.black,
+                    ),
+                  ),
+                if (tech.isNotEmpty) bullet("Technologies: $tech"),
+                if (role.isNotEmpty) bullet("Role: $role"),
+                if (desc.isNotEmpty) bullet("Description: $desc"),
+                pw.SizedBox(height: 6),
+              ],
+            );
+          }),
+        ],
+
+        // Experience
+        if ((sections.contains("experiences") ||
+                sections.contains("work experience") ||
+                sections.contains("internships") || sections.contains("volunteering")) &&
+            Globals.experiences.isNotEmpty) ...[
+          sectionHeader("Experience"),
+          ...Globals.experiences.asMap().entries.map((entry) {
+            final index = entry.key;
+            final exp = entry.value;
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  "${index + 1}. ${exp['role']?.toUpperCase() ?? ''} at ${exp['company'] ?? ''}",
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 11,
+                    color: PdfColors.black,
+                  ),
+                ),
+                if ((exp['duration'] ?? '').isNotEmpty)
+                  pw.Text("Duration: ${exp['duration']}", style: textStyle),
+                if ((exp['description'] ?? '').isNotEmpty)
+                  bullet(exp['description']!),
+                pw.SizedBox(height: 6),
+              ],
+            );
+          }),
+        ],
+
+        // Achievements & Certifications
+        if ((sections.contains("activities") ||
+        sections.contains("achievements") ||
+        sections.contains("awards") ||
+        sections.contains("moot court") || // ← ye line add karo
+        sections.contains("certifications")) &&
+    (Globals.achievements.isNotEmpty ||
+        Globals.certifications.isNotEmpty)) ...[
+  sectionHeader("Activities & Achievements"),
+  ...Globals.achievements.asMap().entries.map(
+    (entry) => numberedBullet(entry.value, entry.key),
+  ),
+  if (Globals.certifications.isNotEmpty) ...[
+    pw.SizedBox(height: 4),
+    pw.Text(
+      "Certifications:",
+      style: pw.TextStyle(
+        fontWeight: pw.FontWeight.bold,
+        fontSize: 11,
+      ),
+    ),
+    ...Globals.certifications.asMap().entries.map(
+      (entry) => numberedBullet(entry.value, entry.key),
+    ),
+  ],
+  pw.SizedBox(height: 10),
+],
+
+
+        // Languages
+        if (sections.contains("languages") && Globals.languages.isNotEmpty) ...[
+          sectionHeader("Languages"),
+          ...Globals.languages.map((lang) {
+            final name = lang["lang"] ?? '';
+            final level = lang["level"] ?? 0;
+            String levelLabel;
+            switch (level) {
+              case 1:
+                levelLabel = "Beginner";
+                break;
+              case 2:
+                levelLabel = "Elementary";
+                break;
+              case 3:
+                levelLabel = "Intermediate";
+                break;
+              case 4:
+                levelLabel = "Advanced";
+                break;
+              case 5:
+                levelLabel = "Fluent";
+                break;
+              default:
+                levelLabel = "Unknown";
+            }
+            return bullet("$name ($levelLabel)");
+          }),
+        ],
+      ],
+    ),
+  );
+}
+
+  pw.Widget buildProfessionalTemplate(
+  Set<String> sections, {
+  pw.ImageProvider? profileImage,
+}) {
+  final pw.TextStyle headerStyle = pw.TextStyle(
+    fontSize: 14,
+    fontWeight: pw.FontWeight.bold,
+    decoration: pw.TextDecoration.underline,
+  );
+
+  final pw.TextStyle textStyle = pw.TextStyle(fontSize: 11);
+
+  pw.Widget sectionHeader(String title) => pw.Padding(
+        padding: const pw.EdgeInsets.only(top: 16, bottom: 8),
+        child: pw.Text(title, style: headerStyle),
+      );
+
+  pw.Widget bullet(String text, {bool useDash = false}) => pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(useDash ? "- " : "• ", style: textStyle),
+          pw.Expanded(child: pw.Text(text, style: textStyle)),
+        ],
+      );
+
+  pw.Widget numberedBullet(String text, int index) => pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text("${index + 1}. ", style: textStyle),
+          pw.Expanded(child: pw.Text(text, style: textStyle)),
+        ],
+      );
+
+  return pw.Padding(
+    padding: const pw.EdgeInsets.all(20),
+    child: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        // Profile Image + Name
+        pw.Center(
+          child: pw.Column(
+            children: [
+              if (profileImage != null)
+                pw.Container(
+                  width: 80,
+                  height: 80,
+                  margin: const pw.EdgeInsets.only(bottom: 10),
+                  decoration: pw.BoxDecoration(
+                    shape: pw.BoxShape.circle,
+                    image: pw.DecorationImage(
+                      image: profileImage,
+                      fit: pw.BoxFit.cover,
+                    ),
+                  ),
+                ),
+              pw.Text(
+                Globals.name.toUpperCase(),
+                style: pw.TextStyle(
+                  fontSize: 20,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        pw.SizedBox(height: 4),
+
+        // Contact
+        pw.Center(
+          child: pw.Text(
+            "${Globals.number} | ${Globals.email}",
+            style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800),
+          ),
+        ),
+
+        // Social Links
+        if (Globals.linkedin.isNotEmpty ||
+            Globals.github.isNotEmpty ||
+            Globals.portfolio.isNotEmpty)
+          pw.Padding(
+            padding: const pw.EdgeInsets.only(top: 4),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
                 if (Globals.linkedin.isNotEmpty)
                   pw.UrlLink(
                     destination: Globals.linkedin.startsWith("http")
@@ -526,7 +843,8 @@ class PdfScreen extends StatelessWidget {
                         : "https://${Globals.linkedin}",
                     child: pw.Text(
                       "LinkedIn: ${Globals.linkedin}",
-                      style: textStyle.copyWith(
+                      style: pw.TextStyle(
+                        fontSize: 9,
                         color: PdfColors.blue,
                         decoration: pw.TextDecoration.underline,
                       ),
@@ -539,7 +857,8 @@ class PdfScreen extends StatelessWidget {
                         : "https://${Globals.github}",
                     child: pw.Text(
                       "GitHub: ${Globals.github}",
-                      style: textStyle.copyWith(
+                      style: pw.TextStyle(
+                        fontSize: 9,
                         color: PdfColors.blue,
                         decoration: pw.TextDecoration.underline,
                       ),
@@ -552,7 +871,8 @@ class PdfScreen extends StatelessWidget {
                         : "https://${Globals.portfolio}",
                     child: pw.Text(
                       "Portfolio: ${Globals.portfolio}",
-                      style: textStyle.copyWith(
+                      style: pw.TextStyle(
+                        fontSize: 9,
                         color: PdfColors.blue,
                         decoration: pw.TextDecoration.underline,
                       ),
@@ -562,642 +882,263 @@ class PdfScreen extends StatelessWidget {
             ),
           ),
 
-          // Summary
-          if ((sections.contains("summary") ||
-                  sections.contains("professional development")) &&
-              (Globals.careerObjective.isNotEmpty ||
-                  Globals.currentdes.isNotEmpty)) ...[
-            sectionHeader("Summary"),
-            if (Globals.currentdes.isNotEmpty)
-              pw.Text("Designation: ${Globals.currentdes}", style: textStyle),
-            if (Globals.careerObjective.isNotEmpty) ...[
-              pw.SizedBox(height: 4),
-              pw.Text(Globals.careerObjective, style: textStyle),
-            ],
-            pw.SizedBox(height: 10),
+        // Summary
+        if ((sections.contains("summary") ||
+                sections.contains("professional development")) &&
+            (Globals.careerObjective.isNotEmpty ||
+                Globals.currentdes.isNotEmpty)) ...[
+          sectionHeader("Summary"),
+          if (Globals.currentdes.isNotEmpty)
+            pw.Text("Designation: ${Globals.currentdes}", style: textStyle),
+          if (Globals.careerObjective.isNotEmpty) ...[
+            pw.SizedBox(height: 4),
+            pw.Text(Globals.careerObjective, style: textStyle),
           ],
+        ],
 
-          // Experience
-          if ((sections.contains("experiences") ||
-                  sections.contains("work experience") ||
-                  sections.contains("internships")) &&
-              Globals.experiences.isNotEmpty) ...[
-            sectionHeader("Experience"),
-            ...Globals.experiences.asMap().entries.map((entry) {
-              final index = entry.key;
-              final exp = entry.value;
-              return pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
+        // Education (moved above Skills)
+        if (sections.contains("education")) ...[
+          sectionHeader("Education"),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                Globals.school,
+                style: pw.TextStyle(
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text(
+                "Year: ${Globals.pass}",
+                style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800),
+              ),
+            ],
+          ),
+          pw.Text(Globals.course, style: textStyle),
+        ],
+
+        // Skills
+        if ((sections.contains("skills") ||
+                sections.contains("technical skills")) &&
+            Globals.skills.isNotEmpty) ...[
+          sectionHeader("Skills"),
+          pw.Wrap(
+            spacing: 10,
+            runSpacing: 6,
+            children: Globals.skills.map((s) {
+              return pw.Container(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.grey200,
+                  borderRadius: pw.BorderRadius.circular(4),
+                ),
+                child: pw.Text(s, style: pw.TextStyle(fontSize: 10)),
+              );
+            }).toList(),
+          ),
+        ],
+
+        // Projects (moved above Experience)
+        if ((sections.contains("projects") ||
+                sections.contains("research projects") ||
+                sections.contains("relevant coursework") || sections.contains("publications")) &&
+            Globals.projects.isNotEmpty) ...[
+          sectionHeader("Projects"),
+          ...Globals.projects.asMap().entries.map((entry) {
+            final i = entry.key;
+            final proj = entry.value;
+            final title = proj['name'] ?? proj['title'] ?? '';
+            final desc = proj['desc'] ?? proj['description'] ?? '';
+            final role = proj['role'] ?? '';
+            final tech = proj['tech'] ?? '';
+
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                if (title.isNotEmpty)
                   pw.Text(
-                    "${index + 1}. ${exp['role']?.toUpperCase() ?? ''}, ${exp['company'] ?? ''}",
+                    "${i + 1}. $title",
                     style: pw.TextStyle(
                       fontWeight: pw.FontWeight.bold,
                       fontSize: 11,
-                      color: PdfColors.deepOrange700,
                     ),
                   ),
-                  if ((exp['duration'] ?? '').isNotEmpty)
-                    pw.Text("Duration: ${exp['duration']}", style: textStyle),
-                  if ((exp['description'] ?? '').isNotEmpty)
-                    bullet(exp['description']!),
-                  pw.SizedBox(height: 6),
-                ],
-              );
-            }),
-          ],
+                if (tech.isNotEmpty)
+                  bullet("Technologies: $tech", useDash: true),
+                if (role.isNotEmpty) bullet("Role: $role", useDash: true),
+                if (desc.isNotEmpty)
+                  bullet("Description: $desc", useDash: true),
+                pw.SizedBox(height: 6),
+              ],
+            );
+          }),
+        ],
 
-          // Projects
-          if ((sections.contains("projects") ||
-                  sections.contains("research projects") ||
-                  sections.contains("relevant coursework")) &&
-              Globals.projects.isNotEmpty) ...[
-            sectionHeader("Projects"),
-            ...Globals.projects.asMap().entries.map((entry) {
-              final index = entry.key;
-              final proj = entry.value;
-              final title = proj['name'] ?? proj['title'] ?? '';
-              final desc = proj['desc'] ?? proj['description'] ?? '';
-              final role = proj['role'] ?? '';
-              final tech = proj['tech'] ?? '';
-
-              return pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  if (title.isNotEmpty)
+        // Experience
+        if ((sections.contains("experiences") ||
+                sections.contains("work experience") ||
+                sections.contains("internships") || sections.contains("volunteering")) &&
+            Globals.experiences.isNotEmpty) ...[
+          sectionHeader("Experience"),
+          ...Globals.experiences.asMap().entries.map((entry) {
+            final i = entry.key;
+            final exp = entry.value;
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
                     pw.Text(
-                      "${index + 1}. $title",
+                      "${i + 1}. ${exp['company'] ?? ''}",
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
                         fontSize: 11,
-                        color: PdfColors.teal800,
                       ),
                     ),
-                  if (tech.isNotEmpty) bullet("Technologies: $tech"),
-                  if (role.isNotEmpty) bullet("Role: $role"),
-                  if (desc.isNotEmpty) bullet("Description: $desc"),
-                  pw.SizedBox(height: 6),
-                ],
-              );
-            }),
-          ],
-
-          // Education
-          if (sections.contains("education")) ...[
-            sectionHeader("Education"),
-            pw.Text(
-              "${Globals.course}, ${Globals.school}",
-              style: pw.TextStyle(
-                color: PdfColors.indigo600,
-                fontSize: 11,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            if (Globals.result.isNotEmpty || Globals.pass.isNotEmpty)
-              pw.Text(
-                "Result: ${Globals.result}, Year: ${Globals.pass}",
-                style: textStyle,
-              ),
-            pw.SizedBox(height: 10),
-          ],
-
-          // Skills
-          if ((sections.contains("skills") ||
-                  sections.contains("technical skills")) &&
-              Globals.skills.isNotEmpty) ...[
-            sectionHeader("Skills"),
-            pw.Wrap(
-              spacing: 10,
-              runSpacing: 6,
-              children: Globals.skills
-                  .map(
-                    (s) => pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 4,
-                      ),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.grey200,
-                        borderRadius: pw.BorderRadius.circular(4),
-                      ),
-                      child: pw.Text(s, style: pw.TextStyle(fontSize: 10)),
-                    ),
-                  )
-                  .toList(),
-            ),
-            pw.SizedBox(height: 10),
-          ],
-
-          // Achievements & Certifications
-          if ((sections.contains("activities") ||
-                  sections.contains("achievements") ||
-                  sections.contains("awards") ||
-                  sections.contains("certifications")) &&
-              (Globals.achievements.isNotEmpty ||
-                  Globals.certifications.isNotEmpty)) ...[
-            sectionHeader("Activities"),
-            ...Globals.achievements.asMap().entries.map(
-              (entry) => numberedBullet(entry.value, entry.key),
-            ),
-            if (Globals.certifications.isNotEmpty) ...[
-              pw.SizedBox(height: 4),
-              pw.Text(
-                "Certifications:",
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: 11,
-                ),
-              ),
-              ...Globals.certifications.asMap().entries.map(
-                (entry) => numberedBullet(entry.value, entry.key),
-              ),
-            ],
-            pw.SizedBox(height: 10),
-          ],
-
-          // References
-          if (sections.contains("references") &&
-              (Globals.r_name.isNotEmpty ||
-                  Globals.designation.isNotEmpty ||
-                  Globals.institute.isNotEmpty)) ...[
-            sectionHeader("References"),
-            if (Globals.r_name.isNotEmpty) bullet("Name: ${Globals.r_name}"),
-            if (Globals.designation.isNotEmpty)
-              bullet("Designation: ${Globals.designation}"),
-            if (Globals.institute.isNotEmpty)
-              bullet("Institute: ${Globals.institute}"),
-            pw.SizedBox(height: 10),
-          ],
-
-          // Hobbies
-          if (sections.contains("interest/hobbies") &&
-              Globals.hobbies.isNotEmpty) ...[
-            sectionHeader("Hobbies"),
-            pw.Wrap(
-              spacing: 10,
-              runSpacing: 6,
-              children: Globals.hobbies
-                  .map(
-                    (hobby) => pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 4,
-                      ),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.grey300,
-                        borderRadius: pw.BorderRadius.circular(4),
-                      ),
-                      child: pw.Text(hobby, style: pw.TextStyle(fontSize: 10)),
-                    ),
-                  )
-                  .toList(),
-            ),
-            pw.SizedBox(height: 10),
-          ],
-
-          // Languages
-          if (sections.contains("languages") &&
-              Globals.languages.isNotEmpty) ...[
-            sectionHeader("Languages"),
-            ...Globals.languages.map((lang) {
-              final level = (lang['level'] as num).toInt();
-              String getLevelLabel(int level) {
-                switch (level) {
-                  case 1:
-                    return "Beginner";
-                  case 2:
-                    return "Elementary";
-                  case 3:
-                    return "Intermediate";
-                  case 4:
-                    return "Advanced";
-                  case 5:
-                    return "Fluent";
-                  default:
-                    return "Unknown";
-                }
-              }
-
-              final label = getLevelLabel(level);
-              return pw.Text("${lang['lang']}: $label", style: textStyle);
-            }),
-            pw.SizedBox(height: 10),
-          ],
-
-          // Declaration
-          if (Globals.declaration.isNotEmpty) ...[
-            sectionHeader("Declaration"),
-            pw.Text(Globals.declaration, style: textStyle),
-            if (Globals.place.isNotEmpty || Globals.date.isNotEmpty)
-              pw.Text(
-                "Place: ${Globals.place} | Date: ${Globals.date}",
-                style: textStyle,
-              ),
-            pw.SizedBox(height: 10),
-          ],
-
-          // Custom Sections
-          for (var section in Globals.customSections) ...[
-            if ((section['title'] ?? '').isNotEmpty &&
-                (section['desc'] ?? '').isNotEmpty) ...[
-              sectionHeader(section['title']!),
-              pw.Text(section['desc']!, style: textStyle),
-              pw.SizedBox(height: 10),
-            ],
-          ],
-        ],
-      ),
-    );
-  }
-
-  pw.Widget buildProfessionalTemplate(
-    Set<String> sections, {
-    pw.ImageProvider? profileImage,
-  }) {
-    final pw.TextStyle headerStyle = pw.TextStyle(
-      fontSize: 14,
-      fontWeight: pw.FontWeight.bold,
-      decoration: pw.TextDecoration.underline,
-    );
-
-    final pw.TextStyle textStyle = pw.TextStyle(fontSize: 11);
-
-    pw.Widget sectionHeader(String title) => pw.Padding(
-      padding: const pw.EdgeInsets.only(top: 16, bottom: 8),
-      child: pw.Text(title, style: headerStyle),
-    );
-
-    pw.Widget bullet(String text, {bool useDash = false}) => pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(useDash ? "- " : "• ", style: textStyle),
-        pw.Expanded(child: pw.Text(text, style: textStyle)),
-      ],
-    );
-
-    pw.Widget numberedBullet(String text, int index) => pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text("${index + 1}. ", style: textStyle),
-        pw.Expanded(child: pw.Text(text, style: textStyle)),
-      ],
-    );
-
-    return pw.Padding(
-      padding: const pw.EdgeInsets.all(20),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          // 👤 Profile Image + Name
-          pw.Center(
-            child: pw.Column(
-              children: [
-                if (profileImage != null)
-                  pw.Container(
-                    width: 80,
-                    height: 80,
-                    margin: const pw.EdgeInsets.only(bottom: 10),
-                    decoration: pw.BoxDecoration(
-                      shape: pw.BoxShape.circle,
-                      image: pw.DecorationImage(
-                        image: profileImage,
-                        fit: pw.BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                pw.Text(
-                  Globals.name.toUpperCase(),
-                  style: pw.TextStyle(
-                    fontSize: 20,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          pw.SizedBox(height: 4),
-
-          // 📞 Contact
-          pw.Center(
-            child: pw.Text(
-              "${Globals.number} | ${Globals.email}",
-              style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800),
-            ),
-          ),
-
-          // 🔗 Social Links
-          if (Globals.linkedin.isNotEmpty ||
-              Globals.github.isNotEmpty ||
-              Globals.portfolio.isNotEmpty)
-            pw.Padding(
-              padding: const pw.EdgeInsets.only(top: 4),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  if (Globals.linkedin.isNotEmpty)
-                    pw.UrlLink(
-                      destination: Globals.linkedin.startsWith("http")
-                          ? Globals.linkedin
-                          : "https://${Globals.linkedin}",
-                      child: pw.Text(
-                        "LinkedIn: ${Globals.linkedin}",
-                        style: pw.TextStyle(
-                          fontSize: 9,
-                          color: PdfColors.blue,
-                          decoration: pw.TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  if (Globals.github.isNotEmpty)
-                    pw.UrlLink(
-                      destination: Globals.github.startsWith("http")
-                          ? Globals.github
-                          : "https://${Globals.github}",
-                      child: pw.Text(
-                        "GitHub: ${Globals.github}",
-                        style: pw.TextStyle(
-                          fontSize: 9,
-                          color: PdfColors.blue,
-                          decoration: pw.TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  if (Globals.portfolio.isNotEmpty)
-                    pw.UrlLink(
-                      destination: Globals.portfolio.startsWith("http")
-                          ? Globals.portfolio
-                          : "https://${Globals.portfolio}",
-                      child: pw.Text(
-                        "Portfolio: ${Globals.portfolio}",
-                        style: pw.TextStyle(
-                          fontSize: 9,
-                          color: PdfColors.blue,
-                          decoration: pw.TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-          // 📝 Summary
-          if ((sections.contains("summary") ||
-                  sections.contains("professional development")) &&
-              (Globals.careerObjective.isNotEmpty ||
-                  Globals.currentdes.isNotEmpty)) ...[
-            sectionHeader("Summary"),
-            if (Globals.currentdes.isNotEmpty)
-              pw.Text("Designation: ${Globals.currentdes}", style: textStyle),
-            if (Globals.careerObjective.isNotEmpty) ...[
-              pw.SizedBox(height: 4),
-              pw.Text(Globals.careerObjective, style: textStyle),
-            ],
-          ],
-
-          // 🛠 Skills
-          if ((sections.contains("skills") ||
-                  sections.contains("technical skills")) &&
-              Globals.skills.isNotEmpty) ...[
-            sectionHeader("Skills"),
-            pw.Wrap(
-              spacing: 10,
-              runSpacing: 6,
-              children: Globals.skills.map((s) {
-                return pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: pw.BoxDecoration(
-                    color: PdfColors.grey200,
-                    borderRadius: pw.BorderRadius.circular(4),
-                  ),
-                  child: pw.Text(s, style: pw.TextStyle(fontSize: 10)),
-                );
-              }).toList(),
-            ),
-          ],
-
-          // 💼 Experience
-          if ((sections.contains("experiences") ||
-                  sections.contains("work experience") ||
-                  sections.contains("internships")) &&
-              Globals.experiences.isNotEmpty) ...[
-            sectionHeader("Experience"),
-            ...Globals.experiences.asMap().entries.map((entry) {
-              final i = entry.key;
-              final exp = entry.value;
-              return pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
+                    if ((exp['duration'] ?? '').isNotEmpty)
                       pw.Text(
-                        "${i + 1}. ${exp['company'] ?? ''}",
+                        exp['duration'] ?? '',
                         style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 11,
+                          fontSize: 10,
+                          color: PdfColors.grey800,
                         ),
                       ),
-                      if ((exp['duration'] ?? '').isNotEmpty)
-                        pw.Text(
-                          exp['duration'] ?? '',
-                          style: pw.TextStyle(
-                            fontSize: 10,
-                            color: PdfColors.grey800,
-                          ),
-                        ),
-                    ],
-                  ),
-                  if ((exp['role'] ?? '').isNotEmpty)
-                    pw.Text(
-                      exp['role'] ?? '',
-                      style: pw.TextStyle(
-                        fontSize: 10,
-                        fontStyle: pw.FontStyle.italic,
-                      ),
-                    ),
-                  if ((exp['description'] ?? '').isNotEmpty)
-                    bullet(exp['description']!),
-                  pw.SizedBox(height: 6),
-                ],
-              );
-            }),
-          ],
-
-          // 🧪 Projects
-          if ((sections.contains("projects") ||
-                  sections.contains("research projects") ||
-                  sections.contains("relevant coursework")) &&
-              Globals.projects.isNotEmpty) ...[
-            sectionHeader("Projects"),
-            ...Globals.projects.asMap().entries.map((entry) {
-              final i = entry.key;
-              final proj = entry.value;
-              final title = proj['name'] ?? proj['title'] ?? '';
-              final desc = proj['desc'] ?? proj['description'] ?? '';
-              final role = proj['role'] ?? '';
-              final tech = proj['tech'] ?? '';
-
-              return pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  if (title.isNotEmpty)
-                    pw.Text(
-                      "${i + 1}. $title",
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 11,
-                      ),
-                    ),
-                  if (tech.isNotEmpty)
-                    bullet("Technologies: $tech", useDash: true),
-                  if (role.isNotEmpty) bullet("Role: $role", useDash: true),
-                  if (desc.isNotEmpty)
-                    bullet("Description: $desc", useDash: true),
-                  pw.SizedBox(height: 6),
-                ],
-              );
-            }),
-          ],
-
-          // 🎓 Education
-          if (sections.contains("education")) ...[
-            sectionHeader("Education"),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text(
-                  Globals.school,
-                  style: pw.TextStyle(
-                    fontSize: 11,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+                  ],
                 ),
-                pw.Text(
-                  "Year: ${Globals.pass}",
-                  style: pw.TextStyle(fontSize: 10, color: PdfColors.grey800),
-                ),
+                if ((exp['role'] ?? '').isNotEmpty)
+                  pw.Text(
+                    exp['role'] ?? '',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontStyle: pw.FontStyle.italic,
+                    ),
+                  ),
+                if ((exp['description'] ?? '').isNotEmpty)
+                  bullet(exp['description']!),
+                pw.SizedBox(height: 6),
               ],
-            ),
-            pw.Text(Globals.course, style: textStyle),
-          ],
+            );
+          }),
+        ],
 
-          // 🏅 Achievements & Certifications
-          if ((sections.contains("achievements") ||
-                  sections.contains("certifications")) &&
-              (Globals.achievements.isNotEmpty ||
-                  Globals.certifications.isNotEmpty)) ...[
-            sectionHeader("Achievements & Certifications"),
-            ...Globals.achievements.asMap().entries.map(
-              (entry) => numberedBullet(entry.value, entry.key),
-            ),
-            if (Globals.certifications.isNotEmpty) ...[
-              pw.SizedBox(height: 4),
-              pw.Text(
-                "Certifications:",
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: 11,
-                ),
-              ),
-              ...Globals.certifications.asMap().entries.map(
-                (entry) => numberedBullet(entry.value, entry.key),
-              ),
-            ],
-          ],
+        // Achievements & Certifications
+        if ((sections.contains("achievements") ||
+        sections.contains("awards") ||
+        sections.contains("moot court") ||
+        sections.contains("certifications")) &&
+    (Globals.achievements.isNotEmpty ||
+        Globals.certifications.isNotEmpty)) ...[
+  sectionHeader("Achievements & Certifications"),
+  ...Globals.achievements.asMap().entries.map(
+    (entry) => numberedBullet(entry.value, entry.key),
+  ),
+  if (Globals.certifications.isNotEmpty) ...[
+    pw.SizedBox(height: 4),
+    pw.Text(
+      "Certifications:",
+      style: pw.TextStyle(
+        fontWeight: pw.FontWeight.bold,
+        fontSize: 11,
+      ),
+    ),
+    ...Globals.certifications.asMap().entries.map(
+      (entry) => numberedBullet(entry.value, entry.key),
+    ),
+  ],
+],
+        // References
+        if (sections.contains("references") &&
+            (Globals.r_name.isNotEmpty ||
+                Globals.designation.isNotEmpty ||
+                Globals.institute.isNotEmpty)) ...[
+          sectionHeader("References"),
+          if (Globals.r_name.isNotEmpty) bullet("Name: ${Globals.r_name}"),
+          if (Globals.designation.isNotEmpty)
+            bullet("Designation: ${Globals.designation}"),
+          if (Globals.institute.isNotEmpty)
+            bullet("Institute: ${Globals.institute}"),
+        ],
 
-          // 🧑‍🤝‍🧑 References
-          if (sections.contains("references") &&
-              (Globals.r_name.isNotEmpty ||
-                  Globals.designation.isNotEmpty ||
-                  Globals.institute.isNotEmpty)) ...[
-            sectionHeader("References"),
-            if (Globals.r_name.isNotEmpty) bullet("Name: ${Globals.r_name}"),
-            if (Globals.designation.isNotEmpty)
-              bullet("Designation: ${Globals.designation}"),
-            if (Globals.institute.isNotEmpty)
-              bullet("Institute: ${Globals.institute}"),
-          ],
-
-          // 🎯 Hobbies
-          if (sections.contains("interest/hobbies") &&
-              Globals.hobbies.isNotEmpty) ...[
-            sectionHeader("Hobbies"),
-            pw.Wrap(
-              spacing: 10,
-              runSpacing: 6,
-              children: Globals.hobbies
-                  .map(
-                    (hobby) => pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 4,
-                      ),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.grey300,
-                        borderRadius: pw.BorderRadius.circular(4),
-                      ),
-                      child: pw.Text(hobby, style: pw.TextStyle(fontSize: 10)),
+        // Hobbies
+        if (sections.contains("interest/hobbies") &&
+            Globals.hobbies.isNotEmpty) ...[
+          sectionHeader("Hobbies"),
+          pw.Wrap(
+            spacing: 10,
+            runSpacing: 6,
+            children: Globals.hobbies
+                .map(
+                  (hobby) => pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
                     ),
-                  )
-                  .toList(),
-            ),
-          ],
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.grey300,
+                      borderRadius: pw.BorderRadius.circular(4),
+                    ),
+                    child: pw.Text(hobby, style: pw.TextStyle(fontSize: 10)),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
 
-          // 🌍 Languages
-          if (sections.contains("languages") &&
-              Globals.languages.isNotEmpty) ...[
-            sectionHeader("Languages"),
-            ...Globals.languages.map((lang) {
-              final level = (lang['level'] as num).toInt();
-              String getLevelLabel(int level) {
-                switch (level) {
-                  case 1:
-                    return "Beginner";
-                  case 2:
-                    return "Elementary";
-                  case 3:
-                    return "Intermediate";
-                  case 4:
-                    return "Advanced";
-                  case 5:
-                    return "Fluent";
-                  default:
-                    return "Unknown";
-                }
+        // Languages
+        if (sections.contains("languages") && Globals.languages.isNotEmpty) ...[
+          sectionHeader("Languages"),
+          ...Globals.languages.map((lang) {
+            final level = (lang['level'] as num).toInt();
+            String getLevelLabel(int level) {
+              switch (level) {
+                case 1:
+                  return "Beginner";
+                case 2:
+                  return "Elementary";
+                case 3:
+                  return "Intermediate";
+                case 4:
+                  return "Advanced";
+                case 5:
+                  return "Fluent";
+                default:
+                  return "Unknown";
               }
+            }
 
-              final label = getLevelLabel(level);
-              return pw.Text("${lang['lang']}: $label", style: textStyle);
-            }),
-          ],
+            final label = getLevelLabel(level);
+            return pw.Text("${lang['lang']}: $label", style: textStyle);
+          }),
+        ],
 
-          // 🧾 Declaration
-          if (Globals.declaration.isNotEmpty) ...[
-            sectionHeader("Declaration"),
-            pw.Text(Globals.declaration, style: textStyle),
-            if (Globals.place.isNotEmpty || Globals.date.isNotEmpty)
-              pw.Text(
-                "Place: ${Globals.place} | Date: ${Globals.date}",
-                style: textStyle,
-              ),
-          ],
+        // Declaration
+        if (Globals.declaration.isNotEmpty) ...[
+          sectionHeader("Declaration"),
+          pw.Text(Globals.declaration, style: textStyle),
+          if (Globals.place.isNotEmpty || Globals.date.isNotEmpty)
+            pw.Text(
+              "Place: ${Globals.place} | Date: ${Globals.date}",
+              style: textStyle,
+            ),
+        ],
 
-          // 📚 Custom Sections
-          for (var section in Globals.customSections) ...[
-            if ((section['title'] ?? '').isNotEmpty &&
-                (section['desc'] ?? '').isNotEmpty) ...[
-              sectionHeader(section['title']!),
-              pw.Text(section['desc']!, style: textStyle),
-            ],
+        // Custom Sections
+        for (var section in Globals.customSections) ...[
+          if ((section['title'] ?? '').isNotEmpty &&
+              (section['desc'] ?? '').isNotEmpty) ...[
+            sectionHeader(section['title']!),
+            pw.Text(section['desc']!, style: textStyle),
           ],
         ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
   pw.Widget buildCreativeTemplate(
     Set<String> sections, {
@@ -1350,7 +1291,7 @@ class PdfScreen extends StatelessWidget {
 
               if ((sections.contains("internships") ||
                       sections.contains("work experience") ||
-                      sections.contains("experiences")) &&
+                      sections.contains("experiences") || sections.contains("volunteering")) &&
                   Globals.experiences.isNotEmpty) ...[
                 sectionHeader("Work Experience"),
                 ...Globals.experiences.asMap().entries.map((entry) {
@@ -1384,7 +1325,7 @@ class PdfScreen extends StatelessWidget {
 
               if ((sections.contains("projects") ||
                       sections.contains("research projects") ||
-                      sections.contains("relevant coursework")) &&
+                      sections.contains("relevant coursework") || sections.contains("publications")) &&
                   Globals.projects.isNotEmpty) ...[
                 sectionHeader("Projects"),
                 ...Globals.projects.asMap().entries.map((entry) {
@@ -1417,24 +1358,26 @@ class PdfScreen extends StatelessWidget {
               ],
 
               if ((sections.contains("activities") ||
-                      sections.contains("achievements") ||
-                      sections.contains("awards") ||
-                      sections.contains("certifications")) &&
-                  (Globals.achievements.isNotEmpty ||
-                      Globals.certifications.isNotEmpty)) ...[
-                sectionHeader("Achievements & Certifications"),
-                ...Globals.achievements.asMap().entries.map(
-                  (entry) => numberedBullet(entry.value, entry.key),
-                ),
-                if (Globals.certifications.isNotEmpty) ...[
-                  pw.SizedBox(height: 4),
-                  pw.Text("Certifications:", style: headingStyle),
-                  ...Globals.certifications.asMap().entries.map(
-                    (entry) => numberedBullet(entry.value, entry.key),
-                  ),
-                ],
-                pw.SizedBox(height: 10),
-              ],
+        sections.contains("achievements") ||
+        sections.contains("awards") ||
+        sections.contains("moot court") || // ← ye add karo
+        sections.contains("certifications")) &&
+    (Globals.achievements.isNotEmpty ||
+        Globals.certifications.isNotEmpty)) ...[
+  sectionHeader("Achievements & Certifications"),
+  ...Globals.achievements.asMap().entries.map(
+    (entry) => numberedBullet(entry.value, entry.key),
+  ),
+  if (Globals.certifications.isNotEmpty) ...[
+    pw.SizedBox(height: 4),
+    pw.Text("Certifications:", style: headingStyle),
+    ...Globals.certifications.asMap().entries.map(
+      (entry) => numberedBullet(entry.value, entry.key),
+    ),
+  ],
+  pw.SizedBox(height: 10),
+],
+
 
               if (sections.contains("languages") &&
                   Globals.languages.isNotEmpty) ...[

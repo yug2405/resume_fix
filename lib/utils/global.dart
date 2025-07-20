@@ -272,7 +272,7 @@ static List<String> relevantCoursework = [];
       "template": "Professional",
       "sections": [
         "Contact Info", "Summary", "Education", "Business Skills",
-        "Experience", "Extracurriculars", "Languages", "Certifications"
+        "Experience", "Languages", "Certifications"
       ],
       "keywords": ["ROI", "Market Research", "CRM", "Strategy"],
     },

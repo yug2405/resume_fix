@@ -31,43 +31,56 @@ class SimpleTemplate extends StatelessWidget {
         ),
       );
 
-  String shortenUrl(String url) {
-    final uri = Uri.tryParse(url.trim());
-    if (uri == null) return url;
-    return uri.host.replaceFirst('www.', '') + uri.path;
+  /// Email and phone clickable text
+  Widget clickableText(String label, String value, String scheme) {
+    if (value.isEmpty) return const SizedBox();
+    final Uri uri = Uri.parse('$scheme${value.trim()}');
+    return RichText(
+      text: TextSpan(
+        text: '$label: $value',
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+      ),
+    );
   }
 
+  /// GitHub, LinkedIn, Portfolio clickable links
   Widget labeledLink(String label, String rawUrl) {
     String url = rawUrl.trim();
-    if (!url.startsWith("http") && !url.startsWith("mailto:")) {
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
       url = "https://$url";
     }
 
     final Uri uri = Uri.parse(url);
-    final String displayText = shortenUrl(uri.toString());
+    final String displayText = url
+        .replaceFirst(RegExp(r'^https?:\/\/(www\.)?'), '')
+        .replaceAll(RegExp(r'\/$'), '');
 
-    return SelectableText.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: "$label: ",
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.black87),
-          ),
-          TextSpan(
-            text: displayText,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              color: Colors.blue,
-              decoration: TextDecoration.underline,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () async {
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
-              },
-          ),
-        ],
+    return RichText(
+      text: TextSpan(
+        text: "$label: $displayText",
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            try {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } catch (e) {
+              debugPrint("Failed to launch $url: $e");
+            }
+          },
       ),
     );
   }
@@ -108,50 +121,20 @@ class SimpleTemplate extends StatelessWidget {
 
           if (sections.contains("contact info")) ...[
             const SizedBox(height: 4),
-            Wrap(
-              spacing: 12,
-              runSpacing: 6,
-              children: [
-                if (Globals.email.isNotEmpty)
-                  RichText(
-                    text: TextSpan(
-                      text: "Email: ${Globals.email}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () async {
-                          final Uri uri = Uri.parse("mailto:${Globals.email}");
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(uri, mode: LaunchMode.externalApplication);
-                          }
-                        },
-                    ),
-                  ),
-                if (Globals.number.isNotEmpty)
-                  RichText(
-                    text: TextSpan(
-                      text: "Phone: ${Globals.number}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () async {
-                          final Uri uri = Uri.parse("tel:${Globals.number}");
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(uri, mode: LaunchMode.externalApplication);
-                          }
-                        },
-                    ),
-                  ),
-                if (Globals.github.isNotEmpty) labeledLink("GitHub", Globals.github),
-                if (Globals.linkedin.isNotEmpty) labeledLink("LinkedIn", Globals.linkedin),
-                if (Globals.portfolio.isNotEmpty) labeledLink("Portfolio", Globals.portfolio),
-              ],
+            Center(
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 6,
+                children: [
+                  if (Globals.email.isNotEmpty) clickableText("Email", Globals.email, "mailto:"),
+                  if (Globals.email.isNotEmpty && Globals.number.isNotEmpty)
+                    Text("|", style: GoogleFonts.poppins(fontSize: 13, color: Colors.blueGrey)),
+                  if (Globals.number.isNotEmpty) clickableText("Phone", Globals.number, "tel:"),
+                  if (Globals.github.isNotEmpty) labeledLink("GitHub", Globals.github),
+                  if (Globals.linkedin.isNotEmpty) labeledLink("LinkedIn", Globals.linkedin),
+                  if (Globals.portfolio.isNotEmpty) labeledLink("Portfolio", Globals.portfolio),
+                ],
+              ),
             ),
           ],
 
@@ -192,7 +175,7 @@ class SimpleTemplate extends StatelessWidget {
 
           if ((sections.contains("projects") ||
                   sections.contains("research projects") ||
-                  sections.contains("relevant coursework")) &&
+                  sections.contains("relevant coursework") || sections.contains("publications")) &&
               Globals.projects.isNotEmpty) ...[
             sectionTitle("📁 Projects"),
             ...Globals.projects.asMap().entries.map((entry) {
@@ -215,7 +198,7 @@ class SimpleTemplate extends StatelessWidget {
 
           if ((sections.contains("internships") ||
                   sections.contains("work experience") ||
-                  sections.contains("experiences")) &&
+                  sections.contains("experiences") || sections.contains("volunteering") ) &&
               Globals.experiences.isNotEmpty) ...[
             sectionTitle("🧑‍💼 Experience"),
             ...Globals.experiences.asMap().entries.map((entry) {

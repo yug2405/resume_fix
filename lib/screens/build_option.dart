@@ -50,6 +50,7 @@ class _BuildOptionState extends State<Buildoption> {
       case 'profile':
         return Globals.careerObjective.isNotEmpty;
       case 'education':
+      case 'professional development':
         return Globals.course.isNotEmpty && Globals.school.isNotEmpty;
       case 'projects':
       case 'portfolio':
@@ -79,7 +80,8 @@ class _BuildOptionState extends State<Buildoption> {
       case 'certifications':
       case 'awards/honors':
       case 'moot court':
-        return Globals.achievements.isNotEmpty || Globals.certifications.isNotEmpty;
+        return Globals.achievements.isNotEmpty ||
+            Globals.certifications.isNotEmpty;
       case 'interest hobbies':
       case 'interest_hobbies':
       case 'languages known':
@@ -98,7 +100,7 @@ class _BuildOptionState extends State<Buildoption> {
             Globals.place.isNotEmpty &&
             Globals.date.isNotEmpty;
       case 'sop evaluator':
-  return true;
+        return true;
       default:
         return false;
     }
@@ -134,7 +136,8 @@ class _BuildOptionState extends State<Buildoption> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                        icon: const Icon(Icons.arrow_back_ios,
+                            color: Colors.white),
                       ),
                       const Text(
                         "BUILDER OPTIONS",
@@ -152,7 +155,8 @@ class _BuildOptionState extends State<Buildoption> {
               Expanded(
                 flex: 10,
                 child: Container(
-                  padding: const EdgeInsets.only(left: 20, right: 20, bottom: 140),
+                  padding:
+                      const EdgeInsets.only(left: 20, right: 20, bottom: 140),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
@@ -182,39 +186,48 @@ class _BuildOptionState extends State<Buildoption> {
                                     height: height / 12,
                                     width: width / 1.2,
                                     margin: const EdgeInsets.all(10),
-                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.shade100.withOpacity(0.2),
+                                      color:
+                                          Colors.grey.shade100.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(25),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          children: [
-                                            SizedBox(width: width / 4),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  section['name'],
-                                                  style: const TextStyle(fontSize: 18, color: Colors.black),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+                                        SizedBox(width: width / 4),
+                                        Expanded(
+                                          child: Text(
+                                            section['name'],
+                                            style: const TextStyle(
+                                                fontSize: 18,
+                                                color: Colors.black),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
                                         ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            if (route != null && route.toString().isNotEmpty) {
-                                              await Navigator.of(context).pushNamed(route);
+                                        InkWell(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                          onTap: () async {
+                                            if (route != null &&
+                                                route.toString().isNotEmpty) {
+                                              await Navigator.of(context)
+                                                  .pushNamed(route);
                                               setState(() {});
                                             }
                                           },
-                                          icon: Icon(
-                                            filled ? Icons.check_circle : Icons.edit,
-                                            color: filled ? Colors.green : Colors.grey,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(10),
+                                            child: Icon(
+                                              filled
+                                                  ? Icons.check_circle
+                                                  : Icons.edit,
+                                              color: filled
+                                                  ? Colors.green
+                                                  : Colors.grey,
+                                              size: 28,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -242,7 +255,8 @@ class _BuildOptionState extends State<Buildoption> {
             left: 20,
             right: 20,
             child: ElevatedButton.icon(
-              onPressed: () => Navigator.of(context).pushNamed('resume_preview'),
+              onPressed: () =>
+                  Navigator.of(context).pushNamed('resume_preview'),
               icon: const Icon(Icons.remove_red_eye_outlined),
               label: const Text("Preview My Resume"),
               style: ElevatedButton.styleFrom(

@@ -60,30 +60,37 @@ class ProfessionalTemplate extends StatelessWidget {
   }
 
   Widget labeledLink(String label, String rawUrl) {
-    String url = rawUrl.trim();
-    if (!url.startsWith("http")) {
-      url = "https://$url";
-    }
-    final Uri uri = Uri.parse(url);
-    final String displayText = shortenUrl(uri.toString());
+  String url = rawUrl.trim();
 
-    return RichText(
-      text: TextSpan(
-        text: "$label: $displayText",
-        style: GoogleFonts.poppins(
-          fontSize: 13,
-          color: Colors.blue,
-          decoration: TextDecoration.underline,
-        ),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () async {
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            }
-          },
-      ),
-    );
+  // Ensure URL always starts with https://
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://$url";
   }
+
+  final Uri uri = Uri.parse(url);
+  final String displayText = url
+      .replaceFirst(RegExp(r'^https?:\/\/(www\.)?'), '') // Shorten display text
+      .replaceAll(RegExp(r'\/$'), ''); // Remove trailing /
+
+  return RichText(
+    text: TextSpan(
+      text: "$label: $displayText",
+      style: GoogleFonts.poppins(
+        fontSize: 13,
+        color: Colors.blue,
+        decoration: TextDecoration.underline,
+      ),
+      recognizer: TapGestureRecognizer()
+        ..onTap = () async {
+          try {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } catch (e) {
+            debugPrint("Failed to launch $url: $e");
+          }
+        },
+    ),
+  );
+}
 
   String getLevelLabel(int level) {
     switch (level) {
@@ -139,10 +146,10 @@ class ProfessionalTemplate extends StatelessWidget {
               spacing: 12,
               runSpacing: 6,
               children: [
-                if (Globals.email.isNotEmpty)
-                  clickableText("Email", Globals.email, "mailto:"),
-                if (Globals.number.isNotEmpty)
-                  clickableText("Phone", Globals.number, "tel:"),
+                if (Globals.email.isNotEmpty) clickableText("Email", Globals.email, "mailto:"),
+if (Globals.email.isNotEmpty && Globals.number.isNotEmpty)
+  Text("|", style: GoogleFonts.poppins(fontSize: 13, color: Colors.blueGrey)),
+if (Globals.number.isNotEmpty) clickableText("Phone", Globals.number, "tel:"),
                 if (Globals.github.isNotEmpty) labeledLink("GitHub", Globals.github),
                 if (Globals.linkedin.isNotEmpty) labeledLink("LinkedIn", Globals.linkedin),
                 if (Globals.portfolio.isNotEmpty) labeledLink("Portfolio", Globals.portfolio),
@@ -196,7 +203,7 @@ class ProfessionalTemplate extends StatelessWidget {
             }).toList()),
 
           if ((sections.contains("projects") || sections.contains("research projects") ||
-                  sections.contains("relevant coursework")) &&
+                  sections.contains("relevant coursework") || sections.contains("publications")) &&
               Globals.projects.isNotEmpty)
             section("📁 Projects", Globals.projects.asMap().entries.map((entry) {
               int i = entry.key;
@@ -220,7 +227,7 @@ class ProfessionalTemplate extends StatelessWidget {
             }).toList()),
 
           if ((sections.contains("internships") || sections.contains("work experience") ||
-                  sections.contains("experiences")) &&
+                  sections.contains("experiences") || sections.contains("volunteering")) &&
               Globals.experiences.isNotEmpty)
             section("🧑‍💼 Experience", Globals.experiences.asMap().entries.map((entry) {
               int i = entry.key;
