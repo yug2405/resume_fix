@@ -23,7 +23,9 @@ class _SoPEvaluatorScreenState extends State<SoPEvaluatorScreen> {
     final text = _sopController.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please paste your SOP before evaluating")),
+        const SnackBar(
+          content: Text("Please paste your SOP before evaluating"),
+        ),
       );
       return;
     }
@@ -39,7 +41,8 @@ class _SoPEvaluatorScreenState extends State<SoPEvaluatorScreen> {
   }
 
   Future<void> _getSOPFeedback(String text) async {
-    final prompt = """
+    final prompt =
+        """
 You are an admissions officer at a top university.
 Please evaluate the following Statement of Purpose (SOP) on:
 
@@ -78,8 +81,10 @@ $text
         final reply = data['choices'][0]['message']['content'];
         setState(() => feedback = reply.trim().replaceAll("**", ""));
       } else {
-        setState(() => feedback =
-            "❌ SOP Evaluation failed.\nStatus: ${response.statusCode}\n${response.body}");
+        setState(
+          () => feedback =
+              "❌ SOP Evaluation failed.\nStatus: ${response.statusCode}\n${response.body}",
+        );
       }
     } catch (e) {
       setState(() => feedback = "❌ SOP Evaluation Error: $e");
@@ -88,7 +93,8 @@ $text
 
   Future<void> _checkPlagiarism(String text) async {
     final url = Uri.parse(
-        "https://plagiarism-source-checker-with-links.p.rapidapi.com/data");
+      "https://plagiarism-source-checker-with-links.p.rapidapi.com/data",
+    );
 
     try {
       final response = await http.post(
@@ -179,11 +185,12 @@ $text
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: (int.tryParse(
-                                    plagiarismScore!.replaceAll('%', ''),
-                                  ) ??
-                                  0) >
-                              20
+                          color:
+                              (int.tryParse(
+                                        plagiarismScore!.replaceAll('%', ''),
+                                      ) ??
+                                      0) >
+                                  20
                               ? Colors.red
                               : Colors.green,
                         ),
@@ -197,8 +204,10 @@ $text
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.grey.shade400),
                       ),
-                      child: Text(feedback!,
-                          style: const TextStyle(fontSize: 16)),
+                      child: Text(
+                        feedback!,
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ),
                 ],
               ),
