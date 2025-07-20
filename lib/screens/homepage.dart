@@ -82,15 +82,6 @@ class _HomepageState extends State<Homepage> {
             const SizedBox(height: 12),
 
             buildMainButton(
-  text: "Edit Existing Resume",
-  onPressed: () {
-    Navigator.of(context).pushNamed(Routes.buildOptionPage);
-  },
-),
-
-            const SizedBox(height: 12),
-
-            buildMainButton(
               text: "Preview Resume",
               onPressed: () {
                 Navigator.of(context).pushNamed(Routes.resumePreviewPage);
